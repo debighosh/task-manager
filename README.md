@@ -38,10 +38,11 @@
    - `npm run preview` (or `pnpm preview`)
 
 ## Screenshot
-Add a screenshot of the app in this repository (for example: `public/screenshot-task-manager.png`) and reference it here:
+ A screenshot of the landing page is viewable here `public/screenshot-task-manager.png`) 
 
-`![Task Manager Screenshot](public/screenshot-task-manager.png)`
+A working prototype of the app is visible at : https://taskmansctp.netlify.app/tasks
 
 ## AI and External Tools Used
 - GitHub Copilot and ChatGPT were used for architecture checks, routing validation, and debugging support.
 - No external repository code was copied verbatim.
+- The assignment was converted into Business Requirements. Then a Spec was developed and the Spec was coded using tools like GitHab Copilot and Claude Code. Some of the interface designs were prototyped using Vercel V0
