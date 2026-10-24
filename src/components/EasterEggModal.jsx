@@ -4,13 +4,17 @@ import { Heart, X, Sparkles } from "lucide-react"
 export default function EasterEggModal({ open, onClose }) {
   const [mounted, setMounted] = useState(false)
   const [closing, setClosing] = useState(false)
+  const [wasOpen, setWasOpen] = useState(open)
 
-  useEffect(() => {
+  // Open flips from the parent. Mounting here (instead of in an effect)
+  // keeps the enter animation without a second render from setState-in-effect.
+  if (open !== wasOpen) {
+    setWasOpen(open)
     if (open) {
       setMounted(true)
       setClosing(false)
     }
-  }, [open])
+  }
 
   useEffect(() => {
     function onKey(e) {

@@ -6,9 +6,10 @@ import { useTasks } from "../context/TaskContext.jsx"
 
 export default function TaskList({ tasks }) {
   const navigate = useNavigate()
-  const { deleteTask, reorderTasks } = useTasks()
+  const { deleteTask, reorderTasks, tasks: allTasks } = useTasks()
   const [draggedId, setDraggedId] = useState(null)
   const [targetId, setTargetId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
   const dragMovedRef = useRef(false)
   // Prevents opening the detail page when the same pointer action ended with a drop.
   const suppressClickRef = useRef(false)
@@ -61,13 +62,18 @@ export default function TaskList({ tasks }) {
   }
 
   if (tasks.length === 0) {
+    const filtersHideTasks = allTasks.length > 0
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
           <Inbox className="h-7 w-7" />
         </div>
-        <h3 className="mt-4 text-base font-semibold text-foreground">No tasks match your filters</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Try adjusting the status or priority filters.</p>
+        <h3 className="mt-4 text-base font-semibold text-foreground">
+          {filtersHideTasks ? "No tasks match your filters" : "No tasks yet"}
+        </h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {filtersHideTasks ? "Try adjusting the status or priority filters." : "Create a task above to add it to the server."}
+        </p>
       </div>
     )
   }
@@ -122,21 +128,29 @@ export default function TaskList({ tasks }) {
 
           <div className="flex shrink-0 items-center gap-2">
             <span
-              className={`hidden rounded-full px-2.5 py-1 text-xs font-medium sm:inline-block ${statusStyles[task.status]}`}
+              className={`hidden rounded-full px-2.5 py-1 text-xs font-medium sm:inline-block ${statusStyles[task.status] ?? statusStyles.todo}`}
             >
-              {STATUS_LABELS[task.status]}
+              {STATUS_LABELS[task.status] ?? task.status}
             </span>
-            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${priorityStyles[task.priority]}`}>
-              {PRIORITY_LABELS[task.priority]}
+            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${priorityStyles[task.priority] ?? priorityStyles.medium}`}>
+              {PRIORITY_LABELS[task.priority] ?? task.priority}
             </span>
             <button
               type="button"
               aria-label={`Delete ${task.title}`}
-              onClick={(e) => {
+              disabled={Number(deletingId) === Number(task.id)}
+              onClick={async (e) => {
                 e.stopPropagation()
-                deleteTask(task.id)
+                setDeletingId(task.id)
+                try {
+                  await deleteTask(task.id)
+                } catch {
+                  // The banner explains the failure; the row stays until the server deletes it.
+                } finally {
+                  setDeletingId(null)
+                }
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
             >
               <Trash2 className="h-4 w-4" />
             </button>

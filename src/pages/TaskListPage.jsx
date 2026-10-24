@@ -3,10 +3,11 @@ import DashboardSidebar from "../components/DashboardSidebar.jsx"
 import FilterBar from "../components/FilterBar.jsx"
 import AddTaskForm from "../components/AddTaskForm.jsx"
 import TaskList from "../components/TaskList.jsx"
+import { TaskLoadError, TaskLoading } from "../components/TaskFeedback.jsx"
 import { useTasks } from "../context/TaskContext.jsx"
 
 export default function TaskListPage() {
-  const { tasks, filteredTasks, filter, setFilter } = useTasks()
+  const { tasks, filteredTasks, filter, setFilter, loadStatus, loadError, reloadTasks } = useTasks()
   const [activePriorities, setActivePriorities] = useState([])
 
   // Status comes from context (spec requirement); priority is an additional layered bonus filter.
@@ -22,6 +23,9 @@ export default function TaskListPage() {
       prev.includes(priority) ? prev.filter((p) => p !== priority) : [...prev, priority],
     )
   }
+
+  if (loadStatus === "loading") return <TaskLoading />
+  if (loadStatus === "error") return <TaskLoadError message={loadError} onRetry={reloadTasks} />
 
   return (
     <main className="mx-auto max-w-7xl animate-page-in px-4 py-8 sm:px-6 lg:px-8">

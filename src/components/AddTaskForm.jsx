@@ -10,19 +10,28 @@ export default function AddTaskForm() {
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState("todo")
   const [priority, setPriority] = useState("medium")
+  const [submitting, setSubmitting] = useState(false)
 
   // Assignment easy bonus: block submit until required fields are filled.
-  const disabled = title.trim().length === 0 || description.trim().length === 0
+  const disabled = title.trim().length === 0 || description.trim().length === 0 || submitting
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     if (disabled) return
-    addTask({ title: title.trim(), description: description.trim(), status, priority })
-    // Clear form after successful add to support rapid task entry.
-    setTitle("")
-    setDescription("")
-    setStatus("todo")
-    setPriority("medium")
+    setSubmitting(true)
+    try {
+      // Wait for the created task (and its server id) before clearing.
+      // A failure leaves the draft on screen so it can be retried.
+      await addTask({ title: title.trim(), description: description.trim(), status, priority })
+      setTitle("")
+      setDescription("")
+      setStatus("todo")
+      setPriority("medium")
+    } catch {
+      // TaskContext surfaces the message in the banner.
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const fieldClass =
@@ -119,7 +128,7 @@ export default function AddTaskForm() {
           }`}
         >
           <Plus className="h-4 w-4" />
-          Add task
+          {submitting ? "Adding task…" : "Add task"}
         </button>
       </div>
     </form>
