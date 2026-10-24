@@ -1,0 +1,21 @@
+# TaskMan is a Vite SPA. React Router (BrowserRouter) handles:
+#   /           redirect to /tasks
+#   /tasks      task list
+#   /tasks/:id  task detail (unknown ids render an in-app not-found state)
+#   *           NotFoundPage
+# Refreshing those paths must return the app, not a host 404.
+# force is left unset so real files under dist/ (JS, CSS, favicon) are served as-is.
+
+[build]
+  command = "pnpm run build"
+  publish = "dist"
+
+[build.environment]
+  # Tailwind's native bindings require Node >= 20. Vite 5 supports 18 or >= 20.
+  # Major 22 tracks the latest Node 22.x on Netlify (verified locally with 22.14.0).
+  NODE_VERSION = "22"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
